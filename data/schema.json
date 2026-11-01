@@ -1,0 +1,244 @@
+{
+  "tables": {
+    "store": {
+      "comment": "门店表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "门店ID"
+        },
+        "name": {
+          "type": "VARCHAR(50)",
+          "comment": "门店名称"
+        },
+        "city": {
+          "type": "VARCHAR(20)",
+          "comment": "所在城市"
+        },
+        "district": {
+          "type": "VARCHAR(30)",
+          "comment": "所在区域"
+        },
+        "open_date": {
+          "type": "DATE",
+          "comment": "开业日期"
+        }
+      },
+      "enums": {},
+      "fks": []
+    },
+    "category": {
+      "comment": "品类表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "品类ID"
+        },
+        "name": {
+          "type": "VARCHAR(50)",
+          "comment": "品类名称"
+        }
+      },
+      "enums": {},
+      "fks": []
+    },
+    "product": {
+      "comment": "商品表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "商品ID"
+        },
+        "category_id": {
+          "type": "INT",
+          "comment": "所属品类ID"
+        },
+        "name": {
+          "type": "VARCHAR(100)",
+          "comment": "商品名称"
+        },
+        "price": {
+          "type": "DECIMAL(10, 2)",
+          "comment": "售价(元)"
+        },
+        "is_active": {
+          "type": "TINYINT(1)",
+          "comment": "是否在售"
+        }
+      },
+      "enums": {},
+      "fks": [
+        {
+          "column": "category_id",
+          "ref_table": "category",
+          "ref_column": "id"
+        }
+      ]
+    },
+    "customer": {
+      "comment": "会员表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "会员ID"
+        },
+        "name": {
+          "type": "VARCHAR(50)",
+          "comment": "会员姓名"
+        },
+        "phone": {
+          "type": "VARCHAR(20)",
+          "comment": "手机号"
+        },
+        "level": {
+          "type": "VARCHAR(10)",
+          "comment": "会员等级：普通, 银卡, 金卡, 黑金"
+        },
+        "registered_at": {
+          "type": "DATETIME",
+          "comment": "注册时间"
+        }
+      },
+      "enums": {
+        "level": [
+          "普通",
+          "银卡",
+          "金卡",
+          "黑金"
+        ]
+      },
+      "fks": []
+    },
+    "orders": {
+      "comment": "订单表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "订单ID"
+        },
+        "store_id": {
+          "type": "INT",
+          "comment": "门店ID"
+        },
+        "customer_id": {
+          "type": "INT",
+          "comment": "会员ID"
+        },
+        "order_date": {
+          "type": "DATETIME",
+          "comment": "下单时间"
+        },
+        "status": {
+          "type": "VARCHAR(10)",
+          "comment": "订单状态：已完成, 已取消, 退款中"
+        },
+        "total_amount": {
+          "type": "DECIMAL(10, 2)",
+          "comment": "订单总额(元)"
+        },
+        "payment_method": {
+          "type": "VARCHAR(10)",
+          "comment": "支付方式：微信, 支付宝, 银行卡, 现金"
+        }
+      },
+      "enums": {
+        "status": [
+          "已完成",
+          "已取消",
+          "退款中"
+        ],
+        "payment_method": [
+          "微信",
+          "支付宝",
+          "银行卡",
+          "现金"
+        ]
+      },
+      "fks": [
+        {
+          "column": "store_id",
+          "ref_table": "store",
+          "ref_column": "id"
+        },
+        {
+          "column": "customer_id",
+          "ref_table": "customer",
+          "ref_column": "id"
+        }
+      ]
+    },
+    "order_item": {
+      "comment": "订单明细表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "明细ID"
+        },
+        "order_id": {
+          "type": "INT",
+          "comment": "订单ID"
+        },
+        "product_id": {
+          "type": "INT",
+          "comment": "商品ID"
+        },
+        "quantity": {
+          "type": "INT",
+          "comment": "数量"
+        },
+        "unit_price": {
+          "type": "DECIMAL(10, 2)",
+          "comment": "成交单价(元)"
+        },
+        "amount": {
+          "type": "DECIMAL(10, 2)",
+          "comment": "小计金额(元)"
+        }
+      },
+      "enums": {},
+      "fks": [
+        {
+          "column": "order_id",
+          "ref_table": "orders",
+          "ref_column": "id"
+        },
+        {
+          "column": "product_id",
+          "ref_table": "product",
+          "ref_column": "id"
+        }
+      ]
+    },
+    "promotion": {
+      "comment": "促销表",
+      "columns": {
+        "id": {
+          "type": "INT",
+          "comment": "促销ID"
+        },
+        "name": {
+          "type": "VARCHAR(100)",
+          "comment": "促销名称"
+        },
+        "discount": {
+          "type": "DECIMAL(4, 2)",
+          "comment": "折扣系数(0.50=五折)"
+        },
+        "start_date": {
+          "type": "DATE",
+          "comment": "开始日期"
+        },
+        "end_date": {
+          "type": "DATE",
+          "comment": "结束日期"
+        }
+      },
+      "enums": {},
+      "fks": []
+    }
+  },
+  "_meta": {
+    "source": "coffee_db/coffee_schema.sql",
+    "source_fingerprint": "1786440524027125100"
+  }
+}
