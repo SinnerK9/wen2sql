@@ -132,5 +132,26 @@ class TestLimitInjection(unittest.TestCase):
         self.assertIn(f"LIMIT {DEFAULT_LIMIT}", final)
 
 
+class TestDialect(unittest.TestCase):
+    """方言参数化:SQLite 的 || 拼接不能被 MySQL 解析器读成 OR(语义会变)。"""
+
+    def test_sqlite_dialect_injects_limit(self):
+        ok, errors, final = validate("SELECT * FROM orders", TABLES, dialect="sqlite")
+        self.assertTrue(ok, errors)
+        self.assertIn(f"LIMIT {DEFAULT_LIMIT}", final)
+
+    def test_sqlite_concat_kept_as_pipe(self):
+        ok, errors, final = validate(
+            "SELECT city || '-' || name AS label FROM store", TABLES, dialect="sqlite")
+        self.assertTrue(ok, errors)
+        self.assertIn("||", final)
+        self.assertNotIn(" OR ", final.upper())
+
+    def test_default_dialect_is_mysql(self):
+        ok, _, final = validate("SELECT CONCAT(city, name) AS label FROM store", TABLES)
+        self.assertTrue(ok)
+        self.assertIn("CONCAT", final.upper())
+
+
 if __name__ == "__main__":
     unittest.main()
