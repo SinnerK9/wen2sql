@@ -1,0 +1,14 @@
+{
+  "terms": [
+    "会员等级：普通、银卡、金卡、黑金",
+    "动销：有订单记录的商品"
+  ],
+  "business_rules": [
+    "订单金额 = order_item.amount 之和",
+    "统计口径默认只算状态为'已完成'的订单",
+    "'上月'指当前日期所在月份的上一个月"
+  ],
+  "examples": [
+    "问：上月各城市订单总额\n答：SELECT s.city, SUM(o.total_amount) AS total FROM orders o JOIN store s ON o.store_id=s.id WHERE o.status='已完成' AND o.order_date >= '2026-07-01' AND o.order_date < '2026-08-01' GROUP BY s.city ORDER BY total DESC"
+  ]
+}
