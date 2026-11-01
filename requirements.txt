@@ -1,0 +1,13 @@
+# COFFEE Text2SQL —— 运行依赖(2026-10-26 实测通过)
+# 环境:Python 3.13.7(.venv);63 个单元用例全绿;SQLite 执行引擎尚未实现,当前执行段走 stub
+#
+# 安装(本机 HTTPS 出站被掐,只能用纯 HTTP 镜像):
+#   ..\.venv\Scripts\python.exe -m pip install -r requirements.txt \
+#       -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com
+
+sqlglot>=25,<31        # 30.24.0 实测通过;AST 校验/LIMIT 改写/截断 COUNT 全依赖它
+pymysql>=1.1           # 1.2.3 实测通过(注意 pymysql.__version__ 显示 2.2.8 是 MySQLdb 兼容常量,不是真实版本)
+openai>=1.40           # 2.46.0;仅 LLM_MODE=api 时需要
+
+# 可选(当前 config.py 只读 os.environ,不加载 .env,接 .env 时再引入)
+# python-dotenv>=1.0

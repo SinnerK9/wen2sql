@@ -8,6 +8,8 @@ venv/
 .env
 .env.local
 *.log
+.tmp/
+.local-docs/
 .idea/
 .vscode/
 .DS_Store
