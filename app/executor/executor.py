@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from app import config
 import pymysql
 from app.constants import MAX_ROWS, EXEC_TIMEOUT
+from app.executor.dialect import ensure_dialect
+from app.executor.sqlite_engine import fetch_sqlite
 from app.executor.truncate import truncate, with_timeout
 from app.executor.stub import fetch_stub
 from concurrent.futures import ThreadPoolExecutor
@@ -14,12 +16,19 @@ class Result:
     total: int | None = None
 
 def execute(sql: str, engine: str = config.EXEC_ENGINE) -> Result:
-    if engine != "mysql" and engine != "stub":
+    # 调用方只传 engine;方言由 config.ENGINE_DIALECT 映射,少一个必传参数就少一处不一致
+    dialect = config.ENGINE_DIALECT.get(engine)
+    if dialect is None:
         raise ValueError("数据库引擎不合法")
-    if engine == "stub":
+    # 进引擎前统一方言:LLM 写 MySQL 语法 + 引擎是 sqlite 是最可能的组合,靠这层兜底
+    sql = ensure_dialect(sql, dialect)
+
+    if engine == "sqlite":
+        columns, rows, truncated, total = fetch_sqlite(sql)
+    elif engine == "stub":
         columns, rows, truncated, total = fetch_stub(sql)
-        return Result(columns=columns, rows=rows, truncated=truncated, total=total)
-    columns, rows, truncated, total = fetch_mysql(sql)
+    else:
+        columns, rows, truncated, total = fetch_mysql(sql)
     return Result(
         columns=columns,
         rows=rows,

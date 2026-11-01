@@ -1,5 +1,20 @@
-"""Prompt 构建:M-Schema 全量注入 + 注释清洗。"""
+"""Prompt 构建:M-Schema 全量注入 + 注释清洗 + 方言声明。"""
 from datetime import datetime
+
+_DIALECT_NAME = {"sqlite": "SQLite 3", "mysql": "MySQL 8.0"}
+
+# 方言提示:LLM 默认按 MySQL 习惯写 DATE_FORMAT / CONCAT / IF,在 SQLite 上必炸。
+# 与其指望它「自己知道」,不如把该方言没有什么、该用什么写死进 prompt。
+_DIALECT_HINT = {
+    "sqlite": (
+        "SQLite 方言:时间格式化用 STRFTIME('%Y-%m', 列),没有 DATE_FORMAT;"
+        "字符串拼接用 ||,没有 CONCAT;条件用 IIF(条件, 真值, 假值),没有 IF;"
+        "取整用 CAST(x AS INTEGER);时间一律写 'YYYY-MM-DD' 字面量,不要用 NOW()。"
+    ),
+    "mysql": (
+        "MySQL 8.0 方言:时间格式化用 DATE_FORMAT(列, '%Y-%m');字符串拼接用 CONCAT。"
+    ),
+}
 
 def _clean_comment(comment: str) -> str:
     # 枚举提示写在注释里,如 '会员等级：普通, 银卡, 金卡, 黑金',
@@ -40,11 +55,15 @@ def format_m_schema(schema_dict: dict) -> str:
     return "\n".join(lines)
 
 def build_prompt(question: str, schema_text: str, terms: str = "",
-                 business_rules: str = "", examples: str = "", now: str = "") -> str:
+                 business_rules: str = "", examples: str = "", now: str = "",
+                 dialect: str = "mysql") -> str:
     
-    """拼完整提示词，全量注入"""
+    """拼完整提示词，全量注入（dialect 决定「按什么方言生成」+ 附该方言的写法提示）"""
     now = now or datetime.now().strftime("%Y-%m-%d %H:%M")
-    return f"""你是 Text2SQL 助手,把中文问题转成 MySQL 8.0 只读 SQL。
+    dialect_name = _DIALECT_NAME.get(dialect, dialect)
+    dialect_hint = _DIALECT_HINT.get(dialect, "")
+    return f"""你是 Text2SQL 助手,把中文问题转成 {dialect_name} 只读 SQL。
+{dialect_hint}
 
     【表结构】
     {schema_text}

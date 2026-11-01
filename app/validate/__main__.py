@@ -12,7 +12,7 @@ def main() -> None:
     args = ap.parse_args()
 
     tables = json.loads(config.SCHEMA_JSON.read_text(encoding="utf-8"))["tables"]
-    ok, errors, final = validate(args.sql, tables)
+    ok, errors, final = validate(args.sql, tables, dialect=config.DB_DIALECT)
     print("[通过]" if ok else "[拦截]")
     for e in errors:
         print("  -", e)

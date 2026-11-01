@@ -46,6 +46,7 @@ def answer(question: str) -> dict:
             terms="\n".join(knowledge.get("terms", [])),
             business_rules="\n".join(knowledge.get("business_rules", [])),
             examples="\n".join(knowledge.get("examples", [])),
+            dialect=config.DB_DIALECT,
         )
 
         raw = chat(
@@ -72,7 +73,7 @@ def answer(question: str) -> dict:
         result_dict["brief"] = obj.get("brief")
         result_dict["chart_type"] = obj.get("chart-type")
 
-        ok, errors, final_sql = validate(obj["sql"], schema["tables"])
+        ok, errors, final_sql = validate(obj["sql"], schema["tables"], dialect=config.DB_DIALECT)
         if not ok:
             result_dict["errors"] = errors
             result_dict["summary"] = "校验未通过"

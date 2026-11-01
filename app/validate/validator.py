@@ -141,10 +141,14 @@ def _apply_limit(stmt) -> None:
     if isinstance(stmt, exp.Select) and _select_is_unbounded(stmt):
         stmt.limit(DEFAULT_LIMIT, copy=False)
 
-def validate(sql: str, tables: dict) -> tuple[bool, list, str]:
-    """单语句 + 编排。返回 (是否通过, 错误列表, 改写后的SQL)。"""
+def validate(sql: str, tables: dict, dialect: str = "mysql") -> tuple[bool, list, str]:
+    """单语句 + 编排。返回 (是否通过, 错误列表, 改写后的SQL)。
+
+    dialect 决定解析和输出用的方言(sqlite / mysql):SQLite 上跑 MySQL 语法会在
+    「解析成功、执行失败」处漏过校验,所以校验器必须和目标引擎同一方言。
+    """
     try:
-        stmts = sqlglot.parse(sql, read="mysql")
+        stmts = sqlglot.parse(sql, read=dialect)
     except Exception as e:
         return False, [f"SQL 解析失败: {e}"], sql
 
@@ -162,4 +166,4 @@ def validate(sql: str, tables: dict) -> tuple[bool, list, str]:
         return False, errors, sql
 
     _apply_limit(stmt)
-    return True, [], stmt.sql(dialect="mysql")
+    return True, [], stmt.sql(dialect=dialect)

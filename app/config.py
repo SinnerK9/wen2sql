@@ -22,7 +22,15 @@ LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
 LLM_MODEL = os.environ.get("LLM_MODEL", "")
 LLM_TEMPERATURE = float(os.environ.get("LLM_TEMPERATURE", "0"))
 
-# 执行引擎:mysql=真库(需账号) / stub=固定假数据(链路联调用)
-EXEC_ENGINE = os.environ.get("EXEC_ENGINE", "stub")
+# 执行引擎:sqlite(默认,零配置可跑) / mysql(真库) / stub(联调假数据)
+EXEC_ENGINE = os.environ.get("EXEC_ENGINE", "sqlite")
+
+# SQLite 库文件(coffee 库)
+SQLITE_DB = Path(os.environ.get("SQLITE_DB", DB_DIR / "coffee.db"))
+
+# 引擎 → SQL 方言:唯一来源,executor(prompt/校验/执行)都从这里取,避免两处映射漂移
+ENGINE_DIALECT = {"sqlite": "sqlite", "mysql": "mysql", "stub": "mysql"}
+# 方言一般由引擎决定,只有特殊场景才需要手动覆盖(如 sqlite 引擎上故意生成 MySQL 语法)
+DB_DIALECT = os.environ.get("DB_DIALECT", ENGINE_DIALECT.get(EXEC_ENGINE, "sqlite"))
 
 KNOWLEDGE_JSON = DATA_DIR / "knowledge.json"
